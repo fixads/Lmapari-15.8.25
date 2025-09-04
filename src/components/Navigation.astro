@@ -1,0 +1,269 @@
+---
+const { t, currentLang } = Astro.props;
+const { pathname } = Astro.url;
+
+// Function to get the base path without language prefix
+const getBasePath = (path: string) => {
+  return path.replace(/^\/(?:de|fr|he)/, '') || '/';
+};
+
+// Function to get the corresponding path for the other language
+const getLanguagePath = (path: string, targetLang: string) => {
+  const basePath = getBasePath(path);
+  if (targetLang === 'en') return basePath;
+  return `/${targetLang}${basePath}`;
+};
+
+const currentPath = pathname;
+const enPath = getLanguagePath(currentPath, 'en');
+const dePath = getLanguagePath(currentPath, 'de');
+const frPath = getLanguagePath(currentPath, 'fr');
+const hePath = getLanguagePath(currentPath, 'he');
+
+const languages = [
+  { code: 'en', label: 'EN', path: enPath },
+  { code: 'de', label: 'DE', path: dePath },
+  { code: 'fr', label: 'FR', path: frPath },
+  { code: 'he', label: 'עב', path: hePath }
+];
+---
+<nav class="bg-white/95 backdrop-blur-md shadow-lg py-3 fixed w-full top-0 z-50">
+  <div class="container mx-auto px-4">
+    <!-- Desktop Layout -->
+    <div class="hidden md:flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex-shrink-0">
+        <img src="/logo.png" alt="Lampari Logo" class="h-12 w-auto object-contain" />
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="flex items-center space-x-8">
+        <a 
+          href={currentLang === 'en' ? '/' : currentLang === 'de' ? '/de' : currentLang === 'fr' ? '/fr' : '/he'} 
+          class="text-gray-700 hover:text-primary font-semibold text-lg px-4 py-2 rounded-lg hover:bg-primary/5 transition-all duration-300"
+        >
+          {t.nav.home}
+        </a>
+        <a 
+          href={currentLang === 'en' ? '/products' : currentLang === 'de' ? '/de/products' : currentLang === 'fr' ? '/fr/products' : '/he/products'} 
+          class="text-gray-700 hover:text-primary font-semibold text-lg px-4 py-2 rounded-lg hover:bg-primary/5 transition-all duration-300"
+        >
+          {t.nav.products}
+        </a>
+        <a 
+          href={currentLang === 'en' ? '/stores' : currentLang === 'de' ? '/de/stores' : currentLang === 'fr' ? '/fr/stores' : '/he/stores'} 
+          class="text-gray-700 hover:text-primary font-semibold text-lg px-4 py-2 rounded-lg hover:bg-primary/5 transition-all duration-300"
+        >
+          {t.nav.stores}
+        </a>
+        <a 
+          href={currentLang === 'en' ? '/contacts' : currentLang === 'de' ? '/de/contacts' : currentLang === 'fr' ? '/fr/contacts' : '/he/contacts'} 
+          class="text-gray-700 hover:text-primary font-semibold text-lg px-4 py-2 rounded-lg hover:bg-primary/5 transition-all duration-300"
+        >
+          {t.nav.contacts}
+        </a>
+      </div>
+
+      <!-- Language Dropdown -->
+      <div class="relative">
+        <button
+          id="language-dropdown-button"
+          class="flex items-center space-x-2 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all duration-300 font-semibold"
+          aria-expanded="false"
+        >
+          <i class="fas fa-globe text-sm"></i>
+          <span>{languages.find(lang => lang.code === currentLang)?.label}</span>
+          <i class="fas fa-chevron-down text-xs"></i>
+        </button>
+        <div
+          id="language-dropdown"
+          class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden"
+        >
+          {languages.map((lang) => (
+            <a
+              href={lang.path}
+              class={`block px-4 py-2 text-sm hover:bg-primary/5 transition-colors ${
+                currentLang === lang.code ? 'text-primary font-semibold bg-primary/5' : 'text-gray-700'
+              }`}
+            >
+              {lang.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div class="md:hidden">
+      <!-- Top Row: Logo and Menu Button -->
+      <div class="flex items-center justify-between py-2">
+        <img src="/logo.png" alt="Lampari Logo" class="h-10 w-auto object-contain" />
+        
+        <div class="flex items-center space-x-3">
+          <!-- Language Selector (Mobile) -->
+          <div class="relative">
+            <button
+              id="mobile-language-button"
+              class="flex items-center space-x-1 px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm font-semibold"
+            >
+              <i class="fas fa-globe text-xs"></i>
+              <span>{languages.find(lang => lang.code === currentLang)?.label}</span>
+              <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+            <div
+              id="mobile-language-dropdown"
+              class="absolute right-0 mt-2 w-24 bg-white rounded-lg shadow-lg border border-gray-200 py-1 hidden z-50"
+            >
+              {languages.map((lang) => (
+                <a
+                  href={lang.path}
+                  class={`block px-3 py-2 text-sm hover:bg-primary/5 transition-colors ${
+                    currentLang === lang.code ? 'text-primary font-semibold bg-primary/5' : 'text-gray-700'
+                  }`}
+                >
+                  {lang.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button
+            id="mobile-menu-button"
+            class="text-gray-600 hover:text-primary focus:outline-none p-2 rounded-lg hover:bg-primary/10 transition-all duration-300"
+            aria-label="Toggle menu"
+          >
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Links -->
+      <div id="mobile-nav-links" class="hidden border-t border-gray-200 pt-4 pb-2">
+        <div class="flex flex-col space-y-2">
+          <a 
+            href={currentLang === 'en' ? '/' : currentLang === 'de' ? '/de' : currentLang === 'fr' ? '/fr' : '/he'} 
+            class="text-gray-700 hover:text-primary font-semibold text-lg py-3 px-4 rounded-lg hover:bg-primary/5 transition-all duration-300"
+          >
+            {t.nav.home}
+          </a>
+          <a 
+            href={currentLang === 'en' ? '/products' : currentLang === 'de' ? '/de/products' : currentLang === 'fr' ? '/fr/products' : '/he/products'} 
+            class="text-gray-700 hover:text-primary font-semibold text-lg py-3 px-4 rounded-lg hover:bg-primary/5 transition-all duration-300"
+          >
+            {t.nav.products}
+          </a>
+          <a 
+            href={currentLang === 'en' ? '/stores' : currentLang === 'de' ? '/de/stores' : currentLang === 'fr' ? '/fr/stores' : '/he/stores'} 
+            class="text-gray-700 hover:text-primary font-semibold text-lg py-3 px-4 rounded-lg hover:bg-primary/5 transition-all duration-300"
+          >
+            {t.nav.stores}
+          </a>
+          <a 
+            href={currentLang === 'en' ? '/contacts' : currentLang === 'de' ? '/de/contacts' : currentLang === 'fr' ? '/fr/contacts' : '/he/contacts'} 
+            class="text-gray-700 hover:text-primary font-semibold text-lg py-3 px-4 rounded-lg hover:bg-primary/5 transition-all duration-300"
+          >
+            {t.nav.contacts}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Spacer for fixed navigation -->
+<div class="h-20 md:h-24"></div>
+
+<script>
+  // Mobile menu functionality
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileNavLinks = document.getElementById('mobile-nav-links');
+
+  if (mobileMenuButton && mobileNavLinks) {
+    mobileMenuButton.addEventListener('click', () => {
+      mobileNavLinks.classList.toggle('hidden');
+      const isExpanded = !mobileNavLinks.classList.contains('hidden');
+      mobileMenuButton.setAttribute('aria-expanded', isExpanded.toString());
+      
+      // Change icon
+      const icon = mobileMenuButton.querySelector('i');
+      if (icon) {
+        icon.className = isExpanded ? 'fas fa-times text-xl' : 'fas fa-bars text-xl';
+      }
+    });
+  }
+
+  // Desktop language dropdown
+  const languageButton = document.getElementById('language-dropdown-button');
+  const languageDropdown = document.getElementById('language-dropdown');
+
+  if (languageButton && languageDropdown) {
+    languageButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      languageDropdown.classList.toggle('hidden');
+      const isExpanded = !languageDropdown.classList.contains('hidden');
+      languageButton.setAttribute('aria-expanded', isExpanded.toString());
+      
+      // Rotate chevron
+      const chevron = languageButton.querySelector('.fa-chevron-down');
+      if (chevron) {
+        chevron.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      languageDropdown.classList.add('hidden');
+      languageButton.setAttribute('aria-expanded', 'false');
+      const chevron = languageButton.querySelector('.fa-chevron-down');
+      if (chevron) {
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+
+  // Mobile language dropdown
+  const mobileLanguageButton = document.getElementById('mobile-language-button');
+  const mobileLanguageDropdown = document.getElementById('mobile-language-dropdown');
+
+  if (mobileLanguageButton && mobileLanguageDropdown) {
+    mobileLanguageButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileLanguageDropdown.classList.toggle('hidden');
+      
+      // Rotate chevron
+      const chevron = mobileLanguageButton.querySelector('.fa-chevron-down');
+      if (chevron) {
+        const isExpanded = !mobileLanguageDropdown.classList.contains('hidden');
+        chevron.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      mobileLanguageDropdown.classList.add('hidden');
+      const chevron = mobileLanguageButton.querySelector('.fa-chevron-down');
+      if (chevron) {
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Smooth transitions */
+  .fa-chevron-down {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  /* Mobile menu animations */
+  #mobile-nav-links {
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* Dropdown animations */
+  #language-dropdown,
+  #mobile-language-dropdown {
+    transition: all 0.2s ease-in-out;
+  }
+</style>

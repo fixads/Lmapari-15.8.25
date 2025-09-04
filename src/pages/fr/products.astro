@@ -1,0 +1,38 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'fr';
+const t = translations[lang];
+---
+
+<Layout title="Produits - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-2xl mx-auto text-center">
+        <div class="bg-white rounded-lg shadow-md p-8">
+          <div class="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-language text-3xl text-primary"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Catalogue de Produits Disponible en Allemand</h2>
+          <p class="text-lg text-gray-600 mb-6">
+            Notre catalogue complet de produits est disponible en allemand. Veuillez visiter la version allemande pour parcourir notre gamme complète de produits casher.
+          </p>
+          <a 
+            href="/de/products" 
+            class="inline-flex items-center justify-center px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-300 text-lg font-semibold shadow-lg"
+          >
+            <i class="fas fa-arrow-right mr-2"></i>
+            Voir le Catalogue Allemand
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer t={t} />
+</Layout>

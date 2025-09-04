@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Welcome from '../components/Welcome.astro';
+import BrandsCarousel from '../components/BrandsCarousel.astro';
+import About from '../components/About.astro';
+import Market from '../components/Market.astro';
+import Photos from '../components/Photos.astro';
+import Footer from '../components/Footer.astro';
+import { translations } from '../i18n/translations';
+
+const lang = 'en';
+const t = translations[lang];
+---
+
+<Layout title="Lampari Vertriebs GmbH - Kosher Food Berlin" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  <Welcome t={t}>
+    <BrandsCarousel slot="brands-carousel" t={t} />
+  </Welcome>
+  <About t={t} />
+  <Market t={t} />
+  <Photos t={t} />
+  <Footer t={t} />
+</Layout>

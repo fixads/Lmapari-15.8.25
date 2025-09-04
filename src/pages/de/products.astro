@@ -1,0 +1,863 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'de';
+const t = translations[lang];
+
+// Google Sheets CSV URL
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/16uwcxxRzv53uWY511xSNRtb5y_RPwbjgfWTpEDosU1A/export?format=csv&gid=0';
+
+let error = null;
+let productsByCategory = {};
+let products = [];
+
+// Simple CSV parser function
+function parseCSV(csvText) {
+  const lines = csvText.split('\n');
+  if (lines.length === 0) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  const data = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim());
+    
+    const row = {};
+    headers.forEach((header, index) => {
+      row[header] = values[index] || '';
+    });
+    
+    // Only add rows with actual data
+    if (Object.values(row).some(value => value && value.trim() !== '')) {
+      data.push(row);
+    }
+  }
+  
+  return data;
+}
+
+try {
+  // Add cache-busting parameter
+  const timestamp = Astro.url.searchParams.get('refresh') || Math.floor(Date.now() / 60000); // Cache for 1 minute
+  const csvUrlWithCache = `${CSV_URL}&_t=${timestamp}`;
+  
+  const response = await fetch(csvUrlWithCache);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const csvText = await response.text();
+  products = parseCSV(csvText);
+  
+  // Group products by category
+  products.forEach(product => {
+    // Try multiple possible category column names to handle any sheet structure
+    const category = product.Category ||
+                    product.Kategorie ||
+                    product.Type ||
+                    product.Typ ||
+                    product.category || 
+                    product.kategorie || 
+                    product.type ||
+                    product.typ ||
+                    product['Product Category'] ||
+                    product['Produktkategorie'] ||
+                    'Sonstige';
+    
+    if (!productsByCategory[category]) {
+      productsByCategory[category] = [];
+    }
+    productsByCategory[category].push(product);
+  });
+  
+} catch (err) {
+  console.error('Error fetching products:', err);
+  error = err.message;
+}
+
+// Sort categories alphabetically, but put "Sonstige" at the end
+const sortedCategories = Object.keys(productsByCategory)
+  .filter(category => category && category.trim() !== '')
+  .sort((a, b) => {
+    if (a === 'Sonstige') return 1;
+    if (b === 'Sonstige') return -1;
+    return a.localeCompare(b);
+  });
+---
+
+<Layout title="Produkte - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">{t.products.title}</h1>
+      
+      <!-- Wholesale Notice -->
+      <div class="mb-12 max-w-4xl mx-auto">
+        <div class="bg-gradient-to-r from-primary/10 to-primary/5 border-l-4 border-primary rounded-lg p-6 sm:p-8 shadow-lg">
+          <h3 class="text-xl sm:text-2xl font-bold text-primary mb-4 flex items-center">
+            <i class="fas fa-store mr-3"></i>
+            Großhandelshinweis & Verkauf im Laden
+          </h3>
+          <div class="space-y-3 text-gray-700 leading-relaxed">
+            <p class="text-base sm:text-lg">
+              Die gezeigten Produkte sind in unserem Laden erhältlich. Die angegebenen Preise richten sich hauptsächlich an Geschäftskunden (Großmengen).
+            </p>
+            <p class="text-base sm:text-lg">
+              Um die Preise zu sehen, fordern Sie bitte ein Passwort per Kontaktformular, E‑Mail oder Telefon an.
+            </p>
+            <p class="text-base sm:text-lg font-medium text-primary">
+              Als Privatkunde sind Sie herzlich eingeladen, in unserem Geschäft direkt einzukaufen.
+            </p>
+          </div>
+          <div class="mt-6 flex flex-col sm:flex-row gap-3">
+            <a 
+              href="/de/contacts" 
+              class="inline-flex items-center justify-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg"
+            >
+              <i class="fas fa-envelope mr-2"></i>
+              Kontakt aufnehmen
+            </a>
+            <a 
+              href="tel:030-33930220" 
+              class="inline-flex items-center justify-center px-6 py-3 bg-white text-primary border-2 border-primary rounded-lg hover:bg-primary/5 transition-all duration-300 text-sm font-medium"
+            >
+              <i class="fas fa-phone mr-2"></i>
+              030 33930220
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {error ? (
+        <div class="text-center py-12">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+            <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-4"></i>
+            <h2 class="text-xl font-bold text-red-800 mb-2">Fehler beim Laden der Produkte</h2>
+            <p class="text-red-600 text-sm">{error}</p>
+          </div>
+        </div>
+      ) : products.length === 0 ? (
+        <div class="text-center py-12">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto">
+            <i class="fas fa-spinner fa-spin text-blue-500 text-2xl mb-4"></i>
+            <h2 class="text-xl font-bold text-blue-800 mb-2">Produkte werden geladen</h2>
+            <p class="text-blue-600 text-sm">Bitte warten Sie, während wir die neuesten Produkte laden...</p>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <!-- Product Stats -->
+          <div class="mb-8 text-center">
+            <p class="text-gray-600 mb-4">
+              <i class="fas fa-box text-primary mr-2"></i>
+              {products.length} Produkte verfügbar in {sortedCategories.length} Kategorien
+            </p>
+            <button
+              id="refresh-products"
+              class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg"
+              title="Produkte aktualisieren"
+            >
+              <i id="refresh-icon" class="fas fa-sync-alt mr-2"></i>
+              <span id="refresh-text">Produkte aktualisieren</span>
+            </button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="mb-8 max-w-lg mx-auto">
+            <div class="relative">
+              <input
+                type="text"
+                id="product-search"
+                placeholder="Produkte suchen..."
+                class="w-full px-4 py-3 pl-12 pr-10 border-2 border-gray-300 rounded-xl focus:border-primary focus:outline-none transition-all duration-300"
+              />
+              <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <button
+                id="clear-search"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors hidden"
+                title="Suche löschen"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div id="search-results-count" class="mt-2 text-sm text-gray-600 text-center hidden">
+              <span id="search-count">0</span> Produkte gefunden
+            </div>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="mb-12 sticky top-20 z-40 bg-gray-50 py-4 -mx-4 px-4 sm:static sm:bg-transparent sm:py-0 sm:mx-0 sm:px-0">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+              <i class="fas fa-filter mr-2 text-primary"></i>
+              Nach Kategorie durchsuchen
+            </h3>
+            
+            <div class="max-w-lg mx-auto relative">
+              <button
+                id="category-dropdown-btn"
+                class="w-full bg-white border-2 border-gray-300 rounded-xl px-6 py-4 text-left shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary focus:border-primary focus:outline-none group sm:shadow-lg"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <i class="fas fa-th-large text-primary mr-3"></i>
+                    <span id="selected-category" class="font-semibold text-gray-800">Alle Produkte anzeigen</span>
+                    <span id="selected-count" class="ml-3 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">{products.length}</span>
+                  </div>
+                  <i id="dropdown-chevron" class="fas fa-chevron-down text-gray-400 group-hover:text-primary transition-all duration-300"></i>
+                </div>
+              </button>
+              
+              <div
+                id="category-dropdown-menu"
+                class="absolute top-full left-0 right-0 mt-3 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto hidden sm:max-h-96"
+              >
+                <!-- All Categories Option -->
+                <button
+                  class="dropdown-option w-full px-6 py-4 text-left hover:bg-primary/5 transition-colors duration-200 border-b border-gray-100"
+                  data-category="all"
+                  data-count={products.length}
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <i class="fas fa-th-large text-primary mr-3"></i>
+                      <span class="font-semibold text-gray-800">Alle Produkte anzeigen</span>
+                    </div>
+                    <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">{products.length}</span>
+                  </div>
+                </button>
+                
+                <!-- Individual Categories -->
+                {sortedCategories.map((category) => (
+                  <button
+                    class="dropdown-option w-full px-6 py-4 text-left hover:bg-primary/5 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
+                    data-category={category}
+                    data-count={productsByCategory[category].length}
+                    data-scroll-target={`category-${category.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <i class="fas fa-tag text-primary mr-3"></i>
+                        <span class="font-semibold text-gray-800">{category}</span>
+                      </div>
+                      <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">{productsByCategory[category].length}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Products by Category -->
+          {sortedCategories.map((category) => (
+            <div class="mb-12 category-section" data-category={category}>
+              <!-- Category Header -->
+              <div class="mb-6" id={`category-${category.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}>
+                <h2 class="text-2xl font-bold text-primary mb-2 flex items-center">
+                  <i class="fas fa-tag mr-3"></i>
+                  {category}
+                </h2>
+                <div class="h-1 bg-gradient-to-r from-primary to-transparent rounded-full w-32"></div>
+                <p class="text-gray-600 mt-2">
+                  {productsByCategory[category].length} Produkt{productsByCategory[category].length !== 1 ? 'e' : ''}
+                </p>
+              </div>
+              
+              <!-- Products Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {productsByCategory[category].map((product, index) => (
+                  <div key={`${category}-${index}`} class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <!-- Category Badge -->
+                    <div class="bg-primary text-white px-3 py-1 text-xs font-medium">
+                      {category}
+                    </div>
+                    
+                    <!-- Product Image -->
+                    <div class="h-32 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
+                      {(product['Photo URL'] || product['Image URL'] || product.ImageURL || product.Image || product.Photo || product.photo) ? (
+                        <img 
+                          src={product['Photo URL'] || product['Image URL'] || product.ImageURL || product.Image || product.Photo || product.photo} 
+                          alt={product.Name || product.ProductName || product.Product || product.Produktname || 'Produktbild'}
+                          class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          loading="lazy"
+                          onError="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        />
+                      ) : null}
+                      <!-- Fallback icon -->
+                      <div class={`w-full h-full flex items-center justify-center ${(product['Photo URL'] || product['Image URL'] || product.ImageURL || product.Image || product.Photo || product.photo) ? 'hidden' : 'flex'}`}>
+                        <i class="fas fa-box text-gray-400 text-2xl"></i>
+                      </div>
+                    </div>
+                    
+                    <!-- Product Information -->
+                    <div class="p-3">
+                      <!-- Brand -->
+                      {(product.Brand || product.Marke || product.brand) && (product.Brand || product.Marke || product.brand).trim() && (
+                        <p class="text-xs text-primary font-medium mb-1 uppercase tracking-wide">
+                          {product.Brand || product.Marke || product.brand}
+                        </p>
+                      )}
+                      
+                      <!-- Product Name -->
+                      <h3 class="font-semibold text-sm text-gray-800 mb-1 line-clamp-2 min-h-[2.5rem]">
+                        {product.Name || 
+                         product.ProductName || 
+                         product.Product || 
+                         product.Produktname || 
+                         product.name || 
+                         product.produktname ||
+                         product['Product Name'] ||
+                         product['Produktname'] ||
+                         'Unbenanntes Produkt'}
+                      </h3>
+                      
+                      <!-- Description -->
+                      {(product.Description || 
+                        product.Beschreibung || 
+                        product.Details || 
+                        product.description || 
+                        product.beschreibung ||
+                        product.details ||
+                        product['Product Description'] ||
+                        product['Produktbeschreibung']) && (
+                        <p class="text-xs text-gray-600 mb-2 line-clamp-2 min-h-[2rem]">
+                          {product.Description || 
+                           product.Beschreibung || 
+                           product.Details || 
+                           product.description || 
+                           product.beschreibung ||
+                           product.details ||
+                           product['Product Description'] ||
+                           product['Produktbeschreibung']}
+                        </p>
+                      )}
+                      
+                      <!-- Price (Protected) -->
+                      <div class="flex justify-between items-center text-xs mt-2">
+                        <div class="price-container">
+                          <div class="price-hidden">
+                            <p class="text-sm font-medium text-gray-600 mb-2">Preise auf Anfrage</p>
+                            <button class="show-price-btn text-xs bg-primary/10 text-primary px-3 py-1 rounded-full hover:bg-primary/20 transition-colors">
+                              Preise anzeigen
+                            </button>
+                          </div>
+                          <div class="price-visible hidden">
+                            <p class="text-lg font-bold text-primary mb-1">
+                              {(product['Price (Euro)'] || 
+                                product['Sales Price'] || 
+                                product.SalesPrice || 
+                                product.Preis || 
+                                product.Price || 
+                                product.price ||
+                                product.preis ||
+                                product['Verkaufspreis'] ||
+                                product.verkaufspreis) ? 
+                                `${product['Price (Euro)'] || 
+                                   product['Sales Price'] || 
+                                   product.SalesPrice || 
+                                   product.Preis || 
+                                   product.Price || 
+                                   product.price ||
+                                   product.preis ||
+                                   product['Verkaufspreis'] ||
+                                   product.verkaufspreis} €` : 
+                                'Preis auf Anfrage'
+                              }
+                            </p>
+                            {(product.Unit || 
+                              product.Einheit || 
+                              product.unit ||
+                              product.einheit ||
+                              product['Sales Unit'] ||
+                              product['Verkaufseinheit']) && 
+                             (product.Unit || product.Einheit || product.unit || product.einheit || product['Sales Unit'] || product['Verkaufseinheit']) !== 'Unbekannt' && 
+                             (product.Unit || product.Einheit || product.unit || product.einheit || product['Sales Unit'] || product['Verkaufseinheit']) !== '' && (
+                              <p class="text-xs text-gray-500">
+                                pro {product.Unit || 
+                                     product.Einheit || 
+                                     product.unit ||
+                                     product.einheit ||
+                                     product['Sales Unit'] ||
+                                     product['Verkaufseinheit']}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Stock Status -->
+                      {(product.Stock || 
+                        product.Lager || 
+                        product.stock || 
+                        product.lager ||
+                        product['Stock Status'] ||
+                        product['Lagerstatus']) && (
+                        <div class="mt-2">
+                          <span class={`text-xs px-2 py-1 rounded-full ${
+                            (product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']).toLowerCase().includes('available') || 
+                            (product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']).toLowerCase().includes('verfügbar') || 
+                            (product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']).toLowerCase().includes('in stock') || 
+                            (product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']).toLowerCase().includes('vorrätig')
+                              ? 'bg-green-100 text-green-800'
+                              : (product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']).toLowerCase().includes('limited') || 
+                                (product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']).toLowerCase().includes('begrenzt')
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {product.Stock || product.Lager || product.stock || product.lager || product['Stock Status'] || product['Lagerstatus']}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          
+          <!-- Footer Info -->
+          <div class="mt-8 text-center text-sm text-gray-500">
+            <p>
+              <i class="fas fa-sync-alt mr-1"></i>
+              Produkte werden automatisch aus unserem Lagersystem aktualisiert
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  </main>
+
+  <!-- Password Modal -->
+  <div id="password-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">
+        Passwort für Preise eingeben
+      </h3>
+      <p class="text-gray-600 mb-4">
+        Um die Preise zu sehen, geben Sie bitte das Passwort ein oder kontaktieren Sie uns für weitere Informationen.
+      </p>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+          <div>
+            <p class="text-blue-800 font-medium mb-1">Kein Passwort?</p>
+            <p class="text-blue-700 text-sm">
+              Kontaktieren Sie uns und wir stellen Ihnen gerne das Passwort zur Verfügung, um unsere B2B-Preise einzusehen.
+            </p>
+          </div>
+        </div>
+      </div>
+      <input
+        type="password"
+        id="price-password"
+        placeholder="Passwort eingeben"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:ring-primary focus:border-primary"
+      />
+      <div id="password-error" class="text-red-500 text-sm mb-4 hidden">
+        Falsches Passwort. Versuchen Sie es erneut oder kontaktieren Sie uns.
+      </div>
+      <div class="flex gap-3">
+        <button
+          id="submit-password"
+          class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          Bestätigen
+        </button>
+        <button
+          id="contact-us-btn"
+          class="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+        >
+          Kontakt
+        </button>
+        <button
+          id="close-modal"
+          class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <Footer t={t} />
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .text-primary {
+    color: #C5A572;
+  }
+  
+  .min-h-[2rem] {
+    min-height: 2rem;
+  }
+  
+  .min-h-[2.5rem] {
+    min-height: 2.5rem;
+  }
+  
+  .price-container {
+    min-width: 80px;
+  }
+  
+  .category-section {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .category-section.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Password protection for prices
+    const passwordModal = document.getElementById('password-modal');
+    const passwordInput = document.getElementById('price-password');
+    const submitPasswordBtn = document.getElementById('submit-password');
+    const contactUsBtn = document.getElementById('contact-us-btn');
+    const closeModalBtn = document.getElementById('close-modal');
+    const passwordError = document.getElementById('password-error');
+    const showPriceBtns = document.querySelectorAll('.show-price-btn');
+    
+    const validPasswords = ['lmpr', 'LMPR', 'Lmpr'];
+    let pricesUnlocked = localStorage.getItem('pricesUnlocked') === 'true';
+    
+    // Check if prices are already unlocked
+    if (pricesUnlocked) {
+      showAllPrices();
+    }
+    
+    // Add click listeners to all "Show prices" buttons
+    showPriceBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (pricesUnlocked) {
+          showAllPrices();
+        } else {
+          passwordModal.classList.remove('hidden');
+          passwordInput.focus();
+        }
+      });
+    });
+    
+    // Submit password
+    function submitPassword() {
+      const password = passwordInput.value.trim();
+      
+      if (validPasswords.includes(password)) {
+        pricesUnlocked = true;
+        localStorage.setItem('pricesUnlocked', 'true');
+        passwordModal.classList.add('hidden');
+        passwordInput.value = '';
+        passwordError.classList.add('hidden');
+        showAllPrices();
+      } else {
+        passwordError.classList.remove('hidden');
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    }
+    
+    // Show all prices
+    function showAllPrices() {
+      document.querySelectorAll('.price-hidden').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.price-visible').forEach(el => el.classList.remove('hidden'));
+    }
+    
+    // Event listeners
+    submitPasswordBtn.addEventListener('click', submitPassword);
+    
+    passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        submitPassword();
+      }
+    });
+    
+    contactUsBtn.addEventListener('click', function() {
+      window.location.href = '/de/contacts';
+    });
+    
+    closeModalBtn.addEventListener('click', function() {
+      passwordModal.classList.add('hidden');
+      passwordInput.value = '';
+      passwordError.classList.add('hidden');
+    });
+    
+    // Close modal when clicking outside
+    passwordModal.addEventListener('click', function(e) {
+      if (e.target === passwordModal) {
+        passwordModal.classList.add('hidden');
+        passwordInput.value = '';
+        passwordError.classList.add('hidden');
+      }
+    });
+    
+    // Refresh functionality
+    const refreshBtn = document.getElementById('refresh-products');
+    const refreshIcon = document.getElementById('refresh-icon');
+    const refreshText = document.getElementById('refresh-text');
+    
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function() {
+        // Show loading state
+        refreshIcon.classList.add('fa-spin');
+        refreshText.textContent = 'Wird aktualisiert...';
+        refreshBtn.disabled = true;
+        refreshBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        
+        // Force immediate refresh with new timestamp
+        const timestamp = new Date().getTime();
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('refresh', timestamp);
+        
+        // Reload the page with cache-busting parameter
+        window.location.href = currentUrl.toString();
+      });
+    }
+    
+    // Auto-refresh every 5 minutes to check for updates
+    setInterval(function() {
+      // Silent refresh check - only reload if there are actual changes
+      const currentTimestamp = Math.floor(Date.now() / 60000);
+      const lastCheck = localStorage.getItem('lastProductCheck');
+      
+      if (!lastCheck || (currentTimestamp - parseInt(lastCheck)) >= 5) {
+        localStorage.setItem('lastProductCheck', currentTimestamp.toString());
+        // You could add a subtle notification here that data was updated
+      }
+    }, 300000); // 5 minutes
+    
+    // Search functionality
+    const searchInput = document.getElementById('product-search');
+    const clearSearchBtn = document.getElementById('clear-search');
+    const searchResultsCount = document.getElementById('search-results-count');
+    const searchCount = document.getElementById('search-count');
+    
+    if (searchInput) {
+      let searchTimeout;
+      
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim().toLowerCase();
+        
+        // Show/hide clear button
+        if (query) {
+          clearSearchBtn.classList.remove('hidden');
+        } else {
+          clearSearchBtn.classList.add('hidden');
+        }
+        
+        // Debounce search
+        searchTimeout = setTimeout(() => {
+          performSearch(query);
+        }, 300);
+      });
+      
+      clearSearchBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        searchResultsCount.classList.add('hidden');
+        performSearch('');
+      });
+      
+      function performSearch(query) {
+        const productCards = document.querySelectorAll('.category-section');
+        let visibleCount = 0;
+        
+        if (!query) {
+          // Show all products
+          productCards.forEach(section => {
+            section.classList.remove('hidden');
+            const cards = section.querySelectorAll('.bg-white.rounded-lg.shadow-md');
+            cards.forEach(card => {
+              card.classList.remove('hidden');
+              visibleCount++;
+            });
+          });
+          searchResultsCount.classList.add('hidden');
+          
+          // Reset category dropdown to "All Products"
+          const selectedCategory = document.getElementById('selected-category');
+          const selectedCount = document.getElementById('selected-count');
+          if (selectedCategory && selectedCount) {
+            selectedCategory.textContent = 'Alle Produkte anzeigen';
+            selectedCount.textContent = document.querySelectorAll('.bg-white.rounded-lg.shadow-md').length;
+          }
+        } else {
+          // Search through products
+          productCards.forEach(section => {
+            const cards = section.querySelectorAll('.bg-white.rounded-lg.shadow-md');
+            let sectionHasVisible = false;
+            
+            cards.forEach(card => {
+              const productName = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+              const productBrand = card.querySelector('.text-primary.font-medium')?.textContent?.toLowerCase() || '';
+              const productDescription = card.querySelector('.text-gray-600.mb-2')?.textContent?.toLowerCase() || '';
+              const productCategory = card.closest('.category-section')?.getAttribute('data-category')?.toLowerCase() || '';
+              
+              const matches = productName.includes(query) || 
+                            productBrand.includes(query) || 
+                            productDescription.includes(query) ||
+                            productCategory.includes(query);
+              
+              if (matches) {
+                card.classList.remove('hidden');
+                sectionHasVisible = true;
+                visibleCount++;
+              } else {
+                card.classList.add('hidden');
+              }
+            });
+            
+            // Show/hide section based on whether it has visible cards
+            if (sectionHasVisible) {
+              section.classList.remove('hidden');
+            } else {
+              section.classList.add('hidden');
+            }
+          });
+          
+          // Show search results count
+          searchCount.textContent = visibleCount;
+          searchResultsCount.classList.remove('hidden');
+          
+          // Update category dropdown to show search results
+          const selectedCategory = document.getElementById('selected-category');
+          const selectedCount = document.getElementById('selected-count');
+          if (selectedCategory && selectedCount) {
+            selectedCategory.textContent = `Suchergebnisse für "${query}"`;
+            selectedCount.textContent = visibleCount;
+          }
+        }
+      }
+    }
+    
+    // Category dropdown functionality
+    const dropdownBtn = document.getElementById('category-dropdown-btn');
+    const dropdownMenu = document.getElementById('category-dropdown-menu');
+    const dropdownChevron = document.getElementById('dropdown-chevron');
+    const selectedCategory = document.getElementById('selected-category');
+    const selectedCount = document.getElementById('selected-count');
+    const dropdownOptions = document.querySelectorAll('.dropdown-option');
+    const categorySections = document.querySelectorAll('.category-section');
+    
+    // Toggle dropdown
+    if (dropdownBtn && dropdownMenu) {
+      dropdownBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = !dropdownMenu.classList.contains('hidden');
+        
+        if (isOpen) {
+          dropdownMenu.classList.add('hidden');
+          dropdownChevron.style.transform = 'rotate(0deg)';
+        } else {
+          dropdownMenu.classList.remove('hidden');
+          dropdownChevron.style.transform = 'rotate(180deg)';
+        }
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function() {
+        dropdownMenu.classList.add('hidden');
+        dropdownChevron.style.transform = 'rotate(0deg)';
+      });
+      
+      // Handle dropdown option selection
+      dropdownOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+          e.stopPropagation();
+          
+          const category = this.getAttribute('data-category');
+          const count = this.getAttribute('data-count');
+          const scrollTarget = this.getAttribute('data-scroll-target');
+          const categoryText = this.querySelector('span').textContent;
+          
+          // Update selected display
+          selectedCategory.textContent = categoryText;
+          selectedCount.textContent = count;
+          
+          // Close dropdown
+          dropdownMenu.classList.add('hidden');
+          dropdownChevron.style.transform = 'rotate(0deg)';
+          
+          // Handle navigation
+          if (category === 'all') {
+            // Show all sections and scroll to top
+            categorySections.forEach(section => {
+              section.classList.remove('hidden');
+              // Show all cards within sections
+              const cards = section.querySelectorAll('.bg-white.rounded-lg.shadow-md');
+              cards.forEach(card => card.classList.remove('hidden'));
+            });
+            
+            // Clear search if active
+            if (searchInput) {
+              searchInput.value = '';
+              clearSearchBtn.classList.add('hidden');
+              searchResultsCount.classList.add('hidden');
+            }
+            
+            window.scrollTo({ 
+              top: 0, 
+              behavior: 'smooth' 
+            });
+          } else {
+            // Show all sections and scroll to selected category
+            categorySections.forEach(section => {
+              section.classList.remove('hidden');
+              // Show all cards within sections
+              const cards = section.querySelectorAll('.bg-white.rounded-lg.shadow-md');
+              cards.forEach(card => card.classList.remove('hidden'));
+            });
+            
+            // Clear search if active
+            if (searchInput) {
+              searchInput.value = '';
+              clearSearchBtn.classList.add('hidden');
+              searchResultsCount.classList.add('hidden');
+            }
+            
+            // Scroll to the selected category
+            if (scrollTarget) {
+              const targetElement = document.getElementById(scrollTarget);
+              if (targetElement) {
+                targetElement.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start',
+                  inline: 'nearest'
+                });
+              }
+            }
+          }
+        });
+      });
+    }
+  });
+</script>

@@ -1,0 +1,183 @@
+---
+const { t } = Astro.props;
+---
+<div 
+  id="cookie-consent" 
+  class="fixed bottom-0 left-0 right-0 bg-white shadow-lg transform translate-y-full transition-transform duration-300 z-50 max-h-[85vh] overflow-y-auto"
+>
+  <div class="container mx-auto p-4">
+    <div class="flex flex-col gap-4">
+      <!-- Content -->
+      <div class="text-sm sm:text-base text-gray-700">
+        <p class="mb-3">
+          {t.cookies.message} 
+          <a 
+            href={`/${t.nav.home === 'Home' ? '' : 'de/'}datenschutz`} 
+            class="text-primary hover:underline inline-block"
+          >
+            {t.cookies.policy}
+          </a>
+        </p>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <input 
+              type="checkbox" 
+              id="essential-cookies" 
+              checked 
+              disabled 
+              class="mt-1 rounded text-primary focus:ring-primary"
+            />
+            <label for="essential-cookies" class="text-sm text-gray-600 leading-tight">
+              {t.cookies.essential}
+            </label>
+          </div>
+          <div class="flex items-start gap-3">
+            <input 
+              type="checkbox" 
+              id="analytics-cookies" 
+              class="mt-1 rounded text-primary focus:ring-primary"
+            />
+            <label for="analytics-cookies" class="text-sm text-gray-600 leading-tight">
+              {t.cookies.analytics}
+            </label>
+          </div>
+          <div class="flex items-start gap-3">
+            <input 
+              type="checkbox" 
+              id="marketing-cookies" 
+              class="mt-1 rounded text-primary focus:ring-primary"
+            />
+            <label for="marketing-cookies" class="text-sm text-gray-600 leading-tight">
+              {t.cookies.marketing}
+            </label>
+          </div>
+          <!-- Placeholder for future tracking pixels -->
+          <div id="tracking-pixels"></div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2">
+        <button
+          id="accept-selected"
+          class="w-full sm:w-auto px-4 py-2.5 bg-white text-primary border-2 border-primary rounded-lg hover:bg-primary/5 transition-colors text-sm font-medium"
+        >
+          {t.cookies.acceptSelected}
+        </button>
+        <button
+          id="accept-all"
+          class="w-full sm:w-auto px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+        >
+          {t.cookies.acceptAll}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cookieConsent = document.getElementById('cookie-consent');
+  const acceptSelected = document.getElementById('accept-selected');
+  const acceptAll = document.getElementById('accept-all');
+  const analyticsCheckbox = document.getElementById('analytics-cookies');
+  const marketingCheckbox = document.getElementById('marketing-cookies');
+  const trackingPixels = document.getElementById('tracking-pixels');
+
+  // Show cookie consent if not already accepted
+  if (!localStorage.getItem('cookieConsent')) {
+    setTimeout(() => {
+      cookieConsent?.classList.remove('translate-y-full');
+    }, 1000);
+  }
+
+  // Handle accept selected
+  acceptSelected?.addEventListener('click', () => {
+    const analytics = analyticsCheckbox instanceof HTMLInputElement && analyticsCheckbox.checked;
+    const marketing = marketingCheckbox instanceof HTMLInputElement && marketingCheckbox.checked;
+    saveCookiePreferences({ analytics, marketing });
+  });
+
+  // Handle accept all
+  acceptAll?.addEventListener('click', () => {
+    saveCookiePreferences({ analytics: true, marketing: true });
+  });
+
+  function saveCookiePreferences({ analytics, marketing }: { analytics: boolean, marketing: boolean }) {
+    localStorage.setItem('cookieConsent', JSON.stringify({ analytics, marketing }));
+    cookieConsent?.classList.add('translate-y-full');
+
+    // Clear existing tracking pixels
+    if (trackingPixels) trackingPixels.innerHTML = '';
+
+    // Add analytics tracking pixels if accepted
+    if (analytics) {
+      // Load Google Analytics when consent is given
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-3WENX09TJM';
+      document.head.appendChild(script);
+      
+      const analyticsScript = document.createElement('script');
+      analyticsScript.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-3WENX09TJM');
+      `;
+      document.head.appendChild(analyticsScript);
+    }
+
+    // Add Meta Pixel if marketing consent is given
+    if (marketing) {
+      const metaScript = document.createElement('script');
+      metaScript.innerHTML = `
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1061549229073414');
+        fbq('track', 'PageView');
+      `;
+      document.head.appendChild(metaScript);
+      
+      // Add noscript fallback
+      const noscript = document.createElement('noscript');
+      const img = document.createElement('img');
+      img.height = 1;
+      img.width = 1;
+      img.style.display = 'none';
+      img.src = 'https://www.facebook.com/tr?id=1061549229073414&ev=PageView&noscript=1';
+      noscript.appendChild(img);
+      document.head.appendChild(noscript);
+    }
+  }
+</script>
+
+<style>
+  input[type="checkbox"] {
+    accent-color: #C5A572;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  #cookie-consent::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  #cookie-consent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  #cookie-consent::-webkit-scrollbar-thumb {
+    background: #C5A572;
+    border-radius: 4px;
+  }
+
+  #cookie-consent::-webkit-scrollbar-thumb:hover {
+    background: #b08f5d;
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'he';
+const t = translations[lang];
+---
+
+<Layout title="פרטים משפטיים - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 sm:p-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-6">פרטים משפטיים</h1>
+        
+        <div class="space-y-4 text-gray-700">
+          <p class="font-semibold">Lampari Vertriebs-GmbH</p>
+          <p>סחר סיטונאי וקמעונאי</p>
+          <p>10711 Berlin Damaschkestraße 31</p>
+          
+          <div class="pt-2">
+            <p>מיוצגת על ידי המנהלים</p>
+            <p>Lali Silber / Mishel Menasherov</p>
+          </div>
+          
+          <div class="pt-2">
+            <p>
+              <span class="font-medium">טלפון:</span> 
+              <a href="tel:+4930-31019680" class="hover:text-primary">+4930-31019680/81</a>
+            </p>
+            <p>
+              <span class="font-medium">אימייל:</span> 
+              <a href="mailto:info@lampari.de" class="hover:text-primary">info@lampari.de</a>
+            </p>
+          </div>
+          
+          <div class="pt-2">
+            <p><span class="font-medium">מספר מע"מ:</span> DE184466785</p>
+            <p>רשומה במרשם המסחר של בית המשפט ברלין-שרלוטנבורג</p>
+            <p><span class="font-medium">מספר מרשם מסחר:</span> HRB 122152 B</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer t={t} />
+</Layout>

@@ -1,0 +1,51 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'de';
+const t = translations[lang];
+---
+
+<Layout title="Impressum - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 sm:p-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-6">Impressum</h1>
+        
+        <div class="space-y-4 text-gray-700">
+          <p class="font-semibold">Lampari Vertriebs-GmbH</p>
+          <p>Groß & Einzelhandel</p>
+          <p>10711 Berlin Damaschkestraße 31</p>
+          
+          <div class="pt-2">
+            <p>vertreten durch die Geschäftsführerin</p>
+            <p>Lali Silber / Mishel Menasherov</p>
+          </div>
+          
+          <div class="pt-2">
+            <p>
+              <span class="font-medium">Telefon:</span> 
+              <a href="tel:+4930-31019680" class="hover:text-primary">+4930-31019680/81</a>
+            </p>
+            <p>
+              <span class="font-medium">E-Mail:</span> 
+              <a href="mailto:info@lampari.de" class="hover:text-primary">info@lampari.de</a>
+            </p>
+          </div>
+          
+          <div class="pt-2">
+            <p><span class="font-medium">USt-IdNr.:</span> DE184466785</p>
+            <p>eingetragen im Handelsregister des Amtsgerichtes Berlin-Charlottenburg</p>
+            <p><span class="font-medium">Handelsregisternummer:</span> HRB 122152 B</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer t={t} />
+</Layout>

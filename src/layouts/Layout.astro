@@ -1,0 +1,124 @@
+---
+import CookieConsent from '../components/CookieConsent.astro';
+import { translations } from '../i18n/translations';
+
+interface Props {
+  title: string;
+  lang: string;
+}
+
+const { title, lang } = Astro.props;
+const t = translations[lang === 'de' ? 'de' : 'en'];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Lampari Vertriebs GmbH – Kosher food in Berlin, Germany and Europe" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+    <link rel="shortcut icon" href="/logo.png" />
+    
+    <!-- Open Graph Meta Tags for Social Media -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content="Lampari Vertriebs GmbH – Your trusted source for kosher food in Berlin, Germany and Europe" />
+    <meta property="og:image" content="/logo.png" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content="Lampari Vertriebs GmbH – Your trusted source for kosher food in Berlin, Germany and Europe" />
+    <meta name="twitter:image" content="/logo.png" />
+    
+    <!-- Additional Meta Tags for Search Engines -->
+    <meta name="author" content="Lampari Vertriebs GmbH" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={Astro.url} />
+    
+    <meta name="generator" content={Astro.generator} />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- RTL support for Hebrew -->
+    {lang === 'he' && (
+      <style>
+        body { direction: rtl; }
+        .ltr { direction: ltr; }
+      </style>
+    )}
+    
+    <title>{title}</title>
+    
+    <!-- Google Analytics - Only loaded if consent given -->
+    <script is:inline>
+      // Check if analytics consent was given
+      const cookieConsent = localStorage.getItem('cookieConsent');
+      if (cookieConsent) {
+        const consent = JSON.parse(cookieConsent);
+        if (consent.analytics) {
+          // Load Google Analytics
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-3WENX09TJM';
+          document.head.appendChild(script);
+          
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-3WENX09TJM');
+        }
+        if (consent.marketing) {
+          // Load Meta Pixel
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '1061549229073414');
+          fbq('track', 'PageView');
+        }
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-white font-['Open_Sans']">
+    <slot />
+    <CookieConsent t={t} />
+    
+    <!-- Sticky Mobile Call Button -->
+    <a 
+      href="tel:+4930-33930220" 
+      class="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40 sm:hidden animate-pulse"
+      aria-label="Call us"
+    >
+      <i class="fas fa-phone text-xl"></i>
+    </a>
+    
+    <script is:inline src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', function() {
+        AOS.init({
+          duration: 800,
+          once: true
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>

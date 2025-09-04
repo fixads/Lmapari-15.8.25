@@ -1,0 +1,98 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'de';
+const t = translations[lang];
+const currentDate = new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Layout title="Datenschutz - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 sm:p-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-6">Datenschutzerklärung und Cookie-Richtlinie</h1>
+        
+        <div class="space-y-6 text-gray-700">
+          <section>
+            <h2 class="text-xl font-bold mb-3">Allgemeine Hinweise</h2>
+            <p>Diese Datenschutzerklärung informiert Sie über Art, Umfang und Zweck der Verarbeitung personenbezogener Daten im Rahmen unseres Onlineangebotes.</p>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">Verantwortliche Stelle</h2>
+            <p>Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
+            <div class="mt-2">
+              <p>Lampari Vertriebs-GmbH</p>
+              <p>Damaschkestraße 31</p>
+              <p>10711 Berlin</p>
+              <p>E-Mail: info@lampari.de</p>
+              <p>Telefon: +4930-31019680/81</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">Welche Daten erfassen wir?</h2>
+            <p>Wir erfassen personenbezogene Daten nur, wenn dies rechtlich erlaubt ist oder wenn Sie uns Ihre Zustimmung geben. Folgende Daten könnten gesammelt werden:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>Vor- und Nachname</li>
+              <li>Kontaktdaten (z.B. E-Mail, Telefonnummer)</li>
+              <li>IP-Adressen</li>
+              <li>Browserinformationen</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">Zweck der Datenverarbeitung</h2>
+            <p>Ihre Daten werden für folgende Zwecke verwendet:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>Bereitstellung und Optimierung unserer Website</li>
+              <li>Kommunikation mit Nutzern</li>
+              <li>Sicherheitsmaßnahmen</li>
+              <li>Reichweitenmessung und Marketing</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">Cookies</h2>
+            <p>Unsere Website verwendet Cookies. Cookies sind kleine Textdateien, die auf Ihrem Gerät gespeichert werden. Cookies ermöglichen uns, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.</p>
+            <p class="mt-2">Sie können die Verwendung von Cookies in Ihrem Browser deaktivieren oder einschränken. Dies kann jedoch die Funktionalität unserer Website einschränken.</p>
+            <p class="mt-2">Wir verwenden:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>Notwendige Cookies (essentiell für die grundlegende Funktionalität der Website)</li>
+              <li>Funktionale Cookies (zur Verbesserung der Benutzererfahrung)</li>
+              <li>Analytische Cookies (zur Auswertung der Nutzung unserer Website)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">Ihre Rechte</h2>
+            <p>Sie haben jederzeit das Recht:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>Auskunft über Ihre gespeicherten Daten zu erhalten (Art. 15 DSGVO)</li>
+              <li>Unrichtige Daten berichtigen zu lassen (Art. 16 DSGVO)</li>
+              <li>Ihre Daten löschen zu lassen (Art. 17 DSGVO)</li>
+              <li>Die Verarbeitung Ihrer Daten einzuschränken (Art. 18 DSGVO)</li>
+              <li>Widerspruch gegen die Verarbeitung Ihrer Daten einzulegen (Art. 21 DSGVO)</li>
+              <li>Datenübertragbarkeit zu verlangen (Art. 20 DSGVO)</li>
+              <li>Ihre Einwilligung zur Datenverarbeitung jederzeit zu widerrufen (Art. 7 Abs. 3 DSGVO)</li>
+              <li>Sich bei der zuständigen Datenschutzaufsichtsbehörde zu beschweren (Art. 77 DSGVO)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">Änderungen der Datenschutzerklärung</h2>
+            <p>Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an aktuelle rechtliche Anforderungen anzupassen oder Änderungen unserer Leistungen in der Datenschutzerklärung umzusetzen.</p>
+            <p class="mt-4 text-sm">Letzte Aktualisierung: {currentDate}</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer t={t} />
+</Layout>

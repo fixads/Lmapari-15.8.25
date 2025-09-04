@@ -1,0 +1,35 @@
+---
+const { t } = Astro.props;
+---
+<section class="py-8 sm:py-16 bg-white">
+  <div class="container mx-auto px-4">
+    <div data-aos="fade-up" data-aos-delay="200">
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-8 sm:mb-12 text-center">{t.market.title}</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div class="bg-gradient-to-br from-white to-primary/5 p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-primary">
+          <div class="bg-primary/10 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-store text-2xl sm:text-3xl text-primary"></i>
+          </div>
+          <p class="text-base sm:text-lg text-gray-700 leading-relaxed">{t.market.intro}</p>
+        </div>
+        <div class="bg-gradient-to-br from-white to-primary/5 p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-primary">
+          <div class="bg-primary/10 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-leaf text-2xl sm:text-3xl text-primary"></i>
+          </div>
+          <p class="text-base sm:text-lg text-gray-700 leading-relaxed">{t.market.vegan}</p>
+        </div>
+        <div class="bg-gradient-to-br from-white to-primary/5 p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-primary">
+          <div class="bg-primary/10 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-6">
+            <i class="fas fa-drumstick-bite text-2xl sm:text-3xl text-primary"></i>
+          </div>
+          <p class="text-base sm:text-lg text-gray-700 leading-relaxed">{t.market.meat}</p>
+        </div>
+      </div>
+      <div class="mt-12 sm:mt-16 text-center">
+        <div class="bg-gradient-to-r from-primary/5 to-primary/10 p-6 sm:p-8 rounded-2xl shadow-lg max-w-4xl mx-auto">
+          <p class="text-base sm:text-lg text-gray-700 leading-relaxed whitespace-pre-line">{t.market.outro}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

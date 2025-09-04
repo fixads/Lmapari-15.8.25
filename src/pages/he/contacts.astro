@@ -1,0 +1,67 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'he';
+const t = translations[lang];
+---
+
+<Layout title="צור קשר - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">{t.contact.title}</h1>
+      
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Contact Information -->
+        <div class="bg-white rounded-lg shadow-md p-6" data-aos="fade-up">
+          <h2 class="text-2xl font-bold text-primary mb-6">{t.contact.getInTouch}</h2>
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <i class="fas fa-map-marker-alt text-primary mt-1 w-6"></i>
+              <div>
+                <p class="font-semibold">{t.contact.address}:</p>
+                <p class="text-gray-700">Damaschkestraße 31, 10711 Berlin</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-phone text-primary mt-1 w-6"></i>
+              <div>
+                <p class="font-semibold">{t.contact.phone}:</p>
+                <p class="text-gray-700">030 33930220</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-envelope text-primary mt-1 w-6"></i>
+              <div>
+                <p class="font-semibold">{t.contact.email}:</p>
+                <p class="text-gray-700">info@lampari.de</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-clock text-primary mt-1 w-6"></i>
+              <div>
+                <p class="font-semibold">{t.contact.businessHours}:</p>
+                <p class="text-gray-700 whitespace-pre-line">
+                  א'-ה': 9:00 – 18:00
+                  ו': 9:00 – 16:00*
+                  ש'-א': סגור
+                </p>
+                <p class="text-sm text-gray-500 mt-1">*שעות חורף: יום שישי עד 15:00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Form Component -->
+        <ContactForm t={t} />
+      </div>
+    </div>
+  </main>
+
+  <Footer t={t} />
+</Layout>

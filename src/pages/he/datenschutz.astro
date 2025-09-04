@@ -1,0 +1,98 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'he';
+const t = translations[lang];
+const currentDate = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Layout title="מדיניות פרטיות - Lampari Vertriebs GmbH" lang={lang}>
+  <Navigation t={t} currentLang={lang} />
+  
+  <main class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 sm:p-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-6">מדיניות פרטיות והנחיות עוגיות</h1>
+        
+        <div class="space-y-6 text-gray-700">
+          <section>
+            <h2 class="text-xl font-bold mb-3">מידע כללי</h2>
+            <p>מדיניות פרטיות זו מיידעת אתכם על אופי, היקף ומטרת עיבוד נתונים אישיים במסגרת השירותים המקוונים שלנו.</p>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">גורם אחראי</h2>
+            <p>אחראי לעיבוד נתונים באתר זה:</p>
+            <div class="mt-2">
+              <p>Lampari Vertriebs-GmbH</p>
+              <p>Damaschkestraße 31</p>
+              <p>10711 Berlin</p>
+              <p>אימייל: info@lampari.de</p>
+              <p>טלפון: +4930-31019680/81</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">אילו נתונים אנו אוספים?</h2>
+            <p>אנו אוספים נתונים אישיים רק כאשר זה מותר חוקית או בהסכמתכם. הנתונים הבאים עשויים להיאסף:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>שם פרטי ושם משפחה</li>
+              <li>פרטי יצירת קשר (למשל, אימייל, מספר טלפון)</li>
+              <li>כתובות IP</li>
+              <li>מידע על הדפדפן</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">מטרת עיבוד הנתונים</h2>
+            <p>הנתונים שלכם משמשים למטרות הבאות:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>אספקה ואופטימיזציה של האתר</li>
+              <li>תקשורת עם משתמשים</li>
+              <li>אמצעי אבטחה</li>
+              <li>מדידת טווח הגעה ושיווק</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">עוגיות</h2>
+            <p>האתר שלנו משתמש בעוגיות. אלו הם קבצי טקסט קטנים הנשמרים במכשיר שלכם. עוגיות עוזרות לנו להפוך את ההצעה שלנו לידידותית יותר למשתמש, יעילה ובטוחה יותר.</p>
+            <p class="mt-2">אתם יכולים להשבית או להגביל עוגיות בהגדרות הדפדפן שלכם. זה עלול להגביל את הפונקציונליות של האתר.</p>
+            <p class="mt-2">אנו משתמשים ב:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>עוגיות חיוניות (נדרשות לפונקציונליות בסיסית של האתר)</li>
+              <li>עוגיות פונקציונליות (לשיפור חוויית המשתמש)</li>
+              <li>עוגיות אנליטיות (לניתוח השימוש באתר)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">הזכויות שלכם</h2>
+            <p>יש לכם זכות:</p>
+            <ul class="list-disc ml-6 mt-2 space-y-1">
+              <li>לבקש מידע על הנתונים השמורים שלכם (סעיף 15 GDPR)</li>
+              <li>לתקן נתונים שגויים (סעיף 16 GDPR)</li>
+              <li>למחוק את הנתונים שלכם (סעיף 17 GDPR)</li>
+              <li>להגביל עיבוד נתונים (סעיף 18 GDPR)</li>
+              <li>להתנגד לעיבוד נתונים (סעיף 21 GDPR)</li>
+              <li>לבקש ניידות נתונים (סעיף 20 GDPR)</li>
+              <li>לבטל הסכמה לעיבוד נתונים (סעיף 7 פסקה 3 GDPR)</li>
+              <li>להגיש תלונה לרשות הפיקוח על הגנת הנתונים הרלוונטית (סעיף 77 GDPR)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-bold mb-3">עדכונים למדיניות הפרטיות</h2>
+            <p>אנו שומרים לעצמנו את הזכות לעדכן מדיניות פרטיות זו כדי לשקף שינויים בדרישות החוקיות או בשירותים שלנו.</p>
+            <p class="mt-4 text-sm">עדכון אחרון: {currentDate}</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer t={t} />
+</Layout>
